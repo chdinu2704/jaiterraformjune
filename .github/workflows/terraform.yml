@@ -50,15 +50,12 @@ jobs:
       run: terraform validate
 
     # Generates an execution plan for Terraform
-    -# name: Terraform Plan
-      #run: terraform plan -var-file=variables/dev-terraform.tfvars
-
     - name: Terraform Plan
       run: terraform plan -input=false -var="client_id=${{ secrets.AZURE_CLIENT_ID }}" \
                       -var="client_secret=${{ secrets.AZURE_CLIENT_SECRET }}" \
                       -var="tenant_id=${{ secrets.AZURE_TENANT_ID }}" \
                       -var="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
-                      -var-file=variables/dev-terraform.tfvars
+                      -var-file="variables/dev-terraform.tfvars"
   
 
       # On push to "main", build or change infrastructure according to Terraform configuration files
