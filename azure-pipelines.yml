@@ -1,0 +1,131 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger: none
+#- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+- name: envd
+  value: 'dev.tfaz'
+- name: envq
+  value: 'qua.tfaz'
+- name: subid
+  value: 'd77e7d04-a62c-4846-98e9-6f3e825eff9d'  
+
+stages:
+
+
+- stage: DevtfIntegration
+  pool: agent1
+  jobs:
+    - job: terraform
+      steps:
+        #- task: TerraformInstaller@1
+          #inputs:
+            #terraformVersion: 'latest'
+
+        - bash: sed -i s/tag/$(envd)/g $(System.DefaultWorkingDirectory)/backend.tf
+          displayName: 'change the state value'
+
+        - task: TerraformTask@5
+          displayName: 'Terraform init'
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            commandOptions: '-var-file=variables/dev-terraform.tfvars'
+            backendServiceArm: 'BOB-MAPP-dev-01(d77e7d04-a62c-4846-98e9-6f3e825eff9d)'
+            backendAzureRmOverrideSubscriptionID: $(subid)
+            backendAzureRmResourceGroupName: 'bob-dev-rg-01'
+            backendAzureRmStorageAccountName: 'jaiterraformst25'
+            backendAzureRmContainerName: 'tfaz'
+            backendAzureRmKey: $(envd)
+
+
+        - task: TerraformTask@5
+          displayName: 'Terraform validate'
+          inputs:
+            provider: 'azurerm'
+            command: 'validate'
+            #commandOptions: '-var-file=variables/dev-terraform.tfvars'
+
+
+        - task: TerraformTask@5
+          displayName: 'Terraform Plan'
+          inputs:
+            provider: 'azurerm'
+            command: 'plan'
+            commandOptions: '-lock=false -var-file=variables/dev-terraform.tfvars'
+            environmentServiceNameAzureRM: 'BOB-MAPP-dev-01(d77e7d04-a62c-4846-98e9-6f3e825eff9d)'
+            environmentAzureRmOverrideSubscriptionID: $(subid)
+
+        - task: TerraformTask@5
+          displayName: 'Terraform Apply'
+          inputs:
+            provider: 'azurerm'
+            command: 'apply'
+            commandOptions: '-lock=false -var-file=variables/dev-terraform.tfvars'
+            environmentServiceNameAzureRM: 'BOB-MAPP-dev-01(d77e7d04-a62c-4846-98e9-6f3e825eff9d)'
+            environmentAzureRmOverrideSubscriptionID: $(subid)
+
+
+- stage: QatfIntegration
+  pool:
+    vmImage: ubuntu-latest
+  dependsOn: DevtfIntegration  
+  jobs:
+    - job: terraform
+      steps:
+        - task: TerraformInstaller@1
+          inputs:
+            terraformVersion: 'latest'
+
+        - bash: sed -i s/tag/$(envq)/g $(System.DefaultWorkingDirectory)/backend.tf
+          displayName: 'change the state value'    
+
+        - bash: cat $(System.DefaultWorkingDirectory)/backend.tf
+          displayName: 'print statefile'
+
+        - task: TerraformTask@5
+          displayName: 'Terraform init'
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            commandOptions: '-var-file=variables/qa-terraform.tfvars'
+            backendServiceArm: 'BOB-MAPP-dev-01(d77e7d04-a62c-4846-98e9-6f3e825eff9d)'
+            backendAzureRmOverrideSubscriptionID: $(subid)
+            backendAzureRmResourceGroupName: 'bob-dev-rg-01'
+            backendAzureRmStorageAccountName: 'jaiterraformst25'
+            backendAzureRmContainerName: 'tfaz'
+            backendAzureRmKey: $(envq)
+
+
+        - task: TerraformTask@5
+          displayName: 'Terraform validate'
+          inputs:
+            provider: 'azurerm'
+            command: 'validate'
+            #commandOptions: '-var-file=variables/qa-terraform.tfvars'
+
+
+        - task: TerraformTask@5
+          displayName: 'Terraform Plan'
+          inputs:
+            provider: 'azurerm'
+            command: 'plan'
+            commandOptions: '-lock=false -var-file=variables/qa-terraform.tfvars'
+            environmentServiceNameAzureRM: 'BOB-MAPP-dev-01(d77e7d04-a62c-4846-98e9-6f3e825eff9d)'
+            environmentAzureRmOverrideSubscriptionID: $(subid)
+
+        - task: TerraformTask@5
+          displayName: 'Terraform Apply'
+          inputs:
+            provider: 'azurerm'
+            command: 'apply'
+            commandOptions: '-lock=false -var-file=variables/qa-terraform.tfvars'
+            environmentServiceNameAzureRM: 'BOB-MAPP-dev-01(d77e7d04-a62c-4846-98e9-6f3e825eff9d)'
+            environmentAzureRmOverrideSubscriptionID: $(subid)

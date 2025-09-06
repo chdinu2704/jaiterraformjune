@@ -1,0 +1,9 @@
+project			= "info"
+location		= "South India"
+env				= "qa"
+account_tier	= "Standard"
+replica_type	= "LRS"
+account_kind	= "StorageV2"
+vnet_cidr		= ["192.168.0.0/16"]
+sub01_cidr		= ["192.168.1.0/24"]
+sub02_cidr		= ["192.168.2.0/24"]
