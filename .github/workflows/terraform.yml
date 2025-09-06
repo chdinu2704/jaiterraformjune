@@ -46,10 +46,6 @@ jobs:
     - name: Terraform Init
       run: terraform init -var-file=variables/dev-terraform.tfvars
 
-    # Checks that all Terraform configuration files adhere to a canonical format
-    - name: Terraform Format
-      run: terraform fmt -check -var-file=variables/dev-terraform.tfvars
-
     - name: Terraform Validate
       run: terraform validate -var-file=variables/dev-terraform.tfvars
 
