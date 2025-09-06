@@ -38,6 +38,26 @@ variable "sub01_cidr" {
 	description = "vnet cidr address space"
 }
 
+variable "client_id" {
+	type = string
+	description = "App reg client id"
+}
+
+variable "subscription_id" {
+	type = string
+	description = "App reg subscription id"
+}
+
+variable "client_secret" {
+	type = string
+	description = "App reg client secret"
+}
+
+variable "tenant_id" {
+	type = string
+	description = "App reg tenant id"
+}
+
 variable "sub02_cidr" {
 	type = list(string)
 	description = "vnet cidr address space"
