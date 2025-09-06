@@ -47,7 +47,7 @@ jobs:
       run: terraform init -var-file=variables/dev-terraform.tfvars
 
     - name: Terraform Validate
-      run: terraform validate -var-file=variables/dev-terraform.tfvars
+      run: terraform validate
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
